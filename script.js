@@ -1,5 +1,6 @@
 const BACKEND_URL = "https://ai-chatbot-backend-07gk.onrender.com";
 
+
 const userInput = document.getElementById("user-input");
 const chatBox = document.getElementById("chat-box");
 const sendButton = document.getElementById("send-button");
@@ -13,9 +14,12 @@ async function sendMessage() {
         return;
     }
 
-    // Show user's message
+
+    // Display user message
     const userMessage = document.createElement("div");
-    userMessage.className = "user-message";
+
+    userMessage.className = "message user-message";
+
     userMessage.textContent = message;
 
     chatBox.appendChild(userMessage);
@@ -25,9 +29,11 @@ async function sendMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
 
-    // Show loading message
+    // Loading message
     const loadingMessage = document.createElement("div");
-    loadingMessage.className = "bot-message";
+
+    loadingMessage.className = "message bot-message";
+
     loadingMessage.textContent = "🤖 Thinking...";
 
     chatBox.appendChild(loadingMessage);
@@ -57,10 +63,10 @@ async function sendMessage() {
         loadingMessage.remove();
 
 
-        // Show Gemini response
+        // Display Gemini response
         const botMessage = document.createElement("div");
 
-        botMessage.className = "bot-message";
+        botMessage.className = "message bot-message";
 
         botMessage.textContent =
             "🤖 " + (data.reply || "No response received.");
@@ -72,24 +78,32 @@ async function sendMessage() {
 
     } catch (error) {
 
-        console.error("Connection error:", error);
+        console.error(error);
 
         loadingMessage.textContent =
-            "❌ Unable to connect to Gemini server.";
+            "❌ Unable to connect to Gemini.";
 
     }
 }
 
 
 // Send button
-sendButton.addEventListener("click", sendMessage);
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
 
 
 // Enter key
-userInput.addEventListener("keydown", function(event) {
+userInput.addEventListener(
+    "keydown",
+    function(event) {
 
-    if (event.key === "Enter") {
-        sendMessage();
+        if (event.key === "Enter") {
+
+            sendMessage();
+
+        }
+
     }
-
-});
+);
