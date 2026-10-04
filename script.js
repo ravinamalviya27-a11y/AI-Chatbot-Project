@@ -1,4 +1,4 @@
-const BACKEND_URL = "YOUR_RENDER_BACKEND_URL/chat";
+const BACKEND_URL = "https://ai-chatbot-backend-07gk.onrender.com";
 
 
 async function sendMessage() {
