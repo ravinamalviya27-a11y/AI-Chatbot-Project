@@ -1,8 +1,4 @@
-const API_KEY = "YOUR_GEMINI_API_KEY";
-
-const API_URL =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
-    API_KEY;
+const BACKEND_URL = "YOUR_RENDER_BACKEND_URL/chat";
 
 
 async function sendMessage() {
@@ -16,30 +12,42 @@ async function sendMessage() {
         return;
     }
 
+
     // Display user message
-    addMessage(userMessage, "user");
+    const userDiv = document.createElement("div");
+
+    userDiv.className = "user-message";
+
+    userDiv.innerHTML = `
+        <p>${escapeHTML(userMessage)}</p>
+    `;
+
+    chatBox.appendChild(userDiv);
 
     input.value = "";
 
-    // Show typing message
-    const typingMessage = document.createElement("div");
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    typingMessage.className = "bot-message";
-    typingMessage.id = "typing";
 
-    typingMessage.innerHTML = `
+    // Loading message
+    const loadingDiv = document.createElement("div");
+
+    loadingDiv.className = "bot-message";
+    loadingDiv.id = "loading-message";
+
+    loadingDiv.innerHTML = `
         <span>🤖</span>
-        <p class="typing">AI is typing...</p>
+        <p>Thinking...</p>
     `;
 
-    chatBox.appendChild(typingMessage);
+    chatBox.appendChild(loadingDiv);
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
 
     try {
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(BACKEND_URL, {
 
             method: "POST",
 
@@ -48,17 +56,7 @@ async function sendMessage() {
             },
 
             body: JSON.stringify({
-
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: userMessage
-                            }
-                        ]
-                    }
-                ]
-
+                message: userMessage
             })
 
         });
@@ -67,71 +65,38 @@ async function sendMessage() {
         const data = await response.json();
 
 
-        document.getElementById("typing").remove();
+        // Remove loading message
+        loadingDiv.remove();
 
 
-        if (data.candidates && data.candidates.length > 0) {
+        // Display AI response
+        const botDiv = document.createElement("div");
 
-            const botReply =
-                data.candidates[0].content.parts[0].text;
+        botDiv.className = "bot-message";
 
-            addMessage(botReply, "bot");
+        botDiv.innerHTML = `
+            <span>🤖</span>
+            <p>${escapeHTML(data.reply)}</p>
+        `;
 
-        } else {
+        chatBox.appendChild(botDiv);
 
-            addMessage(
-                "Sorry, I couldn't understand that.",
-                "bot"
-            );
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-        }
 
     } catch (error) {
 
-        document.getElementById("typing").remove();
-
-        addMessage(
-            "Something went wrong. Please try again.",
-            "bot"
-        );
-
-        console.error(error);
-    }
-}
-
-
-// Function to display messages
-function addMessage(message, sender) {
-
-    const chatBox = document.getElementById("chat-box");
-
-    const messageDiv = document.createElement("div");
-
-    if (sender === "user") {
-
-        messageDiv.className = "user-message";
-
-        messageDiv.innerHTML = `
-            <p>${message}</p>
-        `;
-
-    } else {
-
-        messageDiv.className = "bot-message";
-
-        messageDiv.innerHTML = `
+        loadingDiv.innerHTML = `
             <span>🤖</span>
-            <p>${message}</p>
+            <p>❌ Unable to connect to AI server.</p>
         `;
+
+        console.error("Error:", error);
     }
-
-    chatBox.appendChild(messageDiv);
-
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 
-// Send message using Enter key
+// Press Enter to send message
 document
     .getElementById("user-input")
     .addEventListener("keydown", function(event) {
@@ -141,3 +106,14 @@ document
         }
 
     });
+
+
+// Security helper
+function escapeHTML(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
