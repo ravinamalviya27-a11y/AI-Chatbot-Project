@@ -1,46 +1,36 @@
 const BACKEND_URL = "https://ai-chatbot-backend-07gk.onrender.com";
 
+const userInput = document.getElementById("user-input");
+const chatBox = document.getElementById("chat-box");
+const sendButton = document.getElementById("send-button");
+
 
 async function sendMessage() {
 
-    const input = document.getElementById("user-input");
-    const chatBox = document.getElementById("chat-box");
+    const message = userInput.value.trim();
 
-    const userMessage = input.value.trim();
-
-    if (userMessage === "") {
+    if (!message) {
         return;
     }
 
+    // Show user's message
+    const userMessage = document.createElement("div");
+    userMessage.className = "user-message";
+    userMessage.textContent = message;
 
-    // Display user message
-    const userDiv = document.createElement("div");
+    chatBox.appendChild(userMessage);
 
-    userDiv.className = "user-message";
-
-    userDiv.innerHTML = `
-        <p>${escapeHTML(userMessage)}</p>
-    `;
-
-    chatBox.appendChild(userDiv);
-
-    input.value = "";
+    userInput.value = "";
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
 
-    // Loading message
-    const loadingDiv = document.createElement("div");
+    // Show loading message
+    const loadingMessage = document.createElement("div");
+    loadingMessage.className = "bot-message";
+    loadingMessage.textContent = "🤖 Thinking...";
 
-    loadingDiv.className = "bot-message";
-    loadingDiv.id = "loading-message";
-
-    loadingDiv.innerHTML = `
-        <span>🤖</span>
-        <p>Thinking...</p>
-    `;
-
-    chatBox.appendChild(loadingDiv);
+    chatBox.appendChild(loadingMessage);
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -56,7 +46,7 @@ async function sendMessage() {
             },
 
             body: JSON.stringify({
-                message: userMessage
+                message: message
             })
 
         });
@@ -64,56 +54,42 @@ async function sendMessage() {
 
         const data = await response.json();
 
-
-        // Remove loading message
-        loadingDiv.remove();
+        loadingMessage.remove();
 
 
-        // Display AI response
-        const botDiv = document.createElement("div");
+        // Show Gemini response
+        const botMessage = document.createElement("div");
 
-        botDiv.className = "bot-message";
+        botMessage.className = "bot-message";
 
-        botDiv.innerHTML = `
-            <span>🤖</span>
-            <p>${escapeHTML(data.reply)}</p>
-        `;
+        botMessage.textContent =
+            "🤖 " + (data.reply || "No response received.");
 
-        chatBox.appendChild(botDiv);
+        chatBox.appendChild(botMessage);
 
         chatBox.scrollTop = chatBox.scrollHeight;
 
 
     } catch (error) {
 
-        loadingDiv.innerHTML = `
-            <span>🤖</span>
-            <p>❌ Unable to connect to AI server.</p>
-        `;
+        console.error("Connection error:", error);
 
-        console.error("Error:", error);
+        loadingMessage.textContent =
+            "❌ Unable to connect to Gemini server.";
+
     }
 }
 
 
-// Press Enter to send message
-document
-    .getElementById("user-input")
-    .addEventListener("keydown", function(event) {
-
-        if (event.key === "Enter") {
-            sendMessage();
-        }
-
-    });
+// Send button
+sendButton.addEventListener("click", sendMessage);
 
 
-// Security helper
-function escapeHTML(text) {
+// Enter key
+userInput.addEventListener("keydown", function(event) {
 
-    const div = document.createElement("div");
+    if (event.key === "Enter") {
+        sendMessage();
+    }
 
-    div.textContent = text;
-
-    return div.innerHTML;
-}
+});
