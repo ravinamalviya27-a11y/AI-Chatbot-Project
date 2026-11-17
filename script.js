@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://ai-chatbot-backend-07gk.onrender.com";
+const BACKEND_URL = "https://ai-chatbot-backend-07gk.onrender.com/chat";
 
 
 const userInput = document.getElementById("user-input");
